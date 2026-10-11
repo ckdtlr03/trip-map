@@ -1,49 +1,105 @@
 <title>여행 일정 보드</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Jua&family=Gowun+Dodum&family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Jua&family=Gowun+Dodum&family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans+KR:wght@400;500;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+KR:wght@400;500;600;700&display=swap">
 <style>
-/* Layout: 왼쪽 여행 정보 카드, 오른쪽 날짜별 시간표 열(가로 스크롤), 폰에서는 세로로 쌓임 */
+/* Layout: PC는 왼쪽(오늘 카드 + 여행 정보), 오른쪽 날짜별 열. 폰은 아래 탭(오늘·일정·맛집·정보)으로 한 화면씩.
+   Style: Cal.com DESIGN.md — 흰 캔버스, 검정 버튼, 12px 카드, 얇은 선, 색은 꼬리표에만 */
 :root {
-  --bg: #eef1f4; --panel: #ffffff; --ink: #1d2a3a; --muted: #5f6d7e; --line: #d6dde5;
-  --accent: #1f6f8b; --accent-ink: #ffffff; --soft: #e3eef2;
-  --c-move: #7a8797; --c-food: #c2571a; --c-sight: #1f6f8b; --c-shop: #8a4fb0; --c-rest: #3f8f5a; --c-stay: #4a5a8c;
-  --f-display: "Do Hyeon", "IBM Plex Sans KR", sans-serif;
-  --f-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
-  --f-mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+  --bg: #ffffff; --panel: #ffffff; --ink: #111111; --muted: #6b7280; --line: #e5e7eb;
+  --accent: #111111; --accent-ink: #ffffff; --soft: #f3f4f6; --surface: #f9fafb; --link: #2563eb;
+  --side: #f9fafb; --hover: #f3f4f6; --active: #e5e7eb; --ink2: #374151;
+  --dark: #101010; --dark-ink: #ffffff; --dark-muted: #a1a1aa;
+  --c-move: #6b7280; --c-food: #ea580c; --c-sight: #2563eb; --c-shop: #8b5cf6; --c-rest: #059669; --c-stay: #db2777;
+  --f-display: "Inter", "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --f-body: "Inter", "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --bg: #121820; --panel: #1b2430; --ink: #e4eaf1; --muted: #9aa7b6; --line: #2d3a4a;
-  --accent: #5bb4d1; --accent-ink: #0d1a22; --soft: #1f3340;
-  --c-move: #8d9aab; --c-food: #ea8a52; --c-sight: #5bb4d1; --c-shop: #b98ad8; --c-rest: #6cc08a; --c-stay: #8e9fd6;
+  --bg: #101010; --panel: #1a1a1a; --ink: #f5f5f5; --muted: #a1a1aa; --line: #2a2a2a;
+  --accent: #ffffff; --accent-ink: #111111; --soft: #242424; --surface: #161616; --link: #60a5fa;
+  --side: #141414; --hover: #202020; --active: #2a2a2a; --ink2: #d4d4d8;
+  --dark: #000000; --dark-ink: #ffffff; --dark-muted: #a1a1aa;
+  --c-move: #a1a1aa; --c-food: #fb923c; --c-sight: #60a5fa; --c-shop: #a78bfa; --c-rest: #34d399; --c-stay: #f472b6;
   color-scheme: dark } }
 :root[data-theme="dark"] {
-  --bg: #121820; --panel: #1b2430; --ink: #e4eaf1; --muted: #9aa7b6; --line: #2d3a4a;
-  --accent: #5bb4d1; --accent-ink: #0d1a22; --soft: #1f3340;
-  --c-move: #8d9aab; --c-food: #ea8a52; --c-sight: #5bb4d1; --c-shop: #b98ad8; --c-rest: #6cc08a; --c-stay: #8e9fd6;
+  --bg: #101010; --panel: #1a1a1a; --ink: #f5f5f5; --muted: #a1a1aa; --line: #2a2a2a;
+  --accent: #ffffff; --accent-ink: #111111; --soft: #242424; --surface: #161616; --link: #60a5fa;
+  --side: #141414; --hover: #202020; --active: #2a2a2a; --ink2: #d4d4d8;
+  --dark: #000000; --dark-ink: #ffffff; --dark-muted: #a1a1aa;
+  --c-move: #a1a1aa; --c-food: #fb923c; --c-sight: #60a5fa; --c-shop: #a78bfa; --c-rest: #34d399; --c-stay: #f472b6;
   color-scheme: dark }
 
-body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 14px; line-height: 1.55; padding: 20px 16px 48px; }
-.wrap { max-width: 1600px; margin: 0 auto; display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 20px; align-items: start; }
-@media (max-width: 860px) { .wrap { grid-template-columns: minmax(0, 1fr); } }
-header.top { max-width: 1600px; margin: 0 auto 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: baseline; }
-h1 { font-family: var(--f-display); font-weight: 400; font-size: 30px; margin: 0; letter-spacing: .5px; }
-.save-state { color: var(--muted); font-size: 12px; }
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 14px; line-height: 1.5; }
+[hidden] { display: none !important; }
 
-.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px; display: grid; gap: 14px; }
-.panel h2 { font-family: var(--f-display); font-weight: 400; font-size: 20px; margin: 0; }
-label.f { display: grid; gap: 4px; font-size: 12px; color: var(--muted); font-weight: 500; }
-.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-input, select, textarea { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 7px 9px; width: 100%; box-sizing: border-box; }
-textarea { resize: vertical; min-height: 56px; }
-input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible, .chip:focus-within { outline: 2px solid var(--accent); outline-offset: 1px; }
-.stay { border: 1px solid var(--line); border-radius: 8px; padding: 10px; display: grid; gap: 8px; }
-.leg { grid-column: 1 / -1; font-size: 12px; color: var(--muted); margin: -2px 0 4px; }
-.leg summary { cursor: pointer; list-style: none; padding: 2px 8px; border-radius: 4px; background: var(--soft); width: fit-content; max-width: 100%; box-sizing: border-box; }
-.leg summary::-webkit-details-marker { display: none; }
-.leg ul { margin: 4px 0 0; padding-left: 18px; }
-.leg li.best { color: var(--ink); font-weight: 500; }
-.tail-leg { padding: 0 12px 8px; border-top: 1px dashed var(--line); padding-top: 8px; }
-.fare { font-size: 12px; margin-top: 4px; font-weight: 500; }
+/* 앱 틀: 왼쪽 사이드바 + 본문 (Cal.com 앱 구조) */
+.app { display: grid; grid-template-columns: 248px minmax(0, 1fr); min-height: 100%; }
+.nav { background: var(--side); border-right: 1px solid var(--line); padding: 16px 12px; }
+.nav-in { position: sticky; top: calc(16px + env(safe-area-inset-top, 0px)); display: flex; flex-direction: column; gap: 20px; min-height: calc(100vh - 32px); }
+.brand { display: flex; gap: 10px; align-items: center; padding: 4px 8px; }
+.logo { width: 30px; height: 30px; border-radius: 8px; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; flex: none; }
+.logo svg { width: 16px; height: 16px; }
+.brand b { display: block; font-weight: 600; font-size: 14px; letter-spacing: -.01em; }
+.brand small { display: block; color: var(--muted); font-size: 12px; }
+.nav-list { display: grid; gap: 2px; }
+.nav-list button { display: flex; gap: 10px; align-items: center; justify-content: flex-start; width: 100%; background: transparent; color: var(--ink2); font-weight: 500; font-size: 14px; padding: 8px 10px; border-radius: 6px; text-align: left; }
+.nav-list button:hover { background: var(--hover); }
+.nav-list button[aria-current="page"] { background: var(--active); color: var(--ink); font-weight: 600; }
+svg.i { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.nav-foot { margin-top: auto; padding: 8px 10px; }
+.save-state { color: var(--muted); font-size: 12px; }
+.mtop { display: none; }
+main { padding: 32px 40px 72px; min-width: 0; }
+.view { display: grid; gap: 24px; max-width: 1080px; }
+
+/* 페이지 머리: 제목·설명 왼쪽, 버튼 오른쪽 */
+.ph { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: flex-start; justify-content: space-between; }
+.ph > div:first-child { min-width: 0; flex: 1 1 320px; }
+.ph h1 { font: 600 20px/1.3 var(--f-display); letter-spacing: -.02em; margin: 0; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; text-wrap: balance; }
+.ph .sub { margin: 4px 0 0; color: var(--muted); font-size: 14px; max-width: 72ch; }
+.ph .hint { margin: 6px 0 0; color: var(--muted); font-size: 12px; }
+.ph-act { display: flex; gap: 8px; flex-wrap: wrap; }
+.badge { font-size: 12px; font-weight: 500; padding: 1px 8px; border-radius: 6px; background: var(--soft); color: var(--ink2); }
+
+/* 버튼: 검정 기본, 흰 보조 */
+button, a.btn { font: inherit; font-size: 14px; font-weight: 600; border: 1px solid transparent; border-radius: 8px; padding: 8px 14px; cursor: pointer; background: var(--accent); color: var(--accent-ink); text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px; line-height: 1.3; }
+button.sec, a.sec, button.ghost { background: var(--panel); color: var(--ink); border-color: var(--line); font-weight: 500; }
+a.sec { font-size: 14px; border: 1px solid var(--line); border-radius: 8px; padding: 8px 14px; text-decoration: none; display: inline-flex; align-items: center; line-height: 1.3; }
+button.sec:hover, a.sec:hover, button.ghost:hover { background: var(--hover); }
+button.sm { padding: 5px 10px; font-size: 12px; }
+button:disabled { opacity: .5; cursor: default; }
+input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible, a:focus-visible, .chip:focus-within { outline: 2px solid var(--ink); outline-offset: 2px; }
+button.danger { color: var(--c-food); }
+.status { font-size: 13px; color: var(--muted); min-height: 1.2em; }
+.status.err { color: var(--c-food); }
+
+/* 입력 */
+label.f { display: grid; gap: 6px; font-size: 14px; color: var(--ink); font-weight: 500; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+input, select, textarea { font: inherit; font-size: 14px; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; width: 100%; box-sizing: border-box; }
+textarea { resize: vertical; min-height: 64px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { position: relative; }
+.chip input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+.chip span { display: inline-block; padding: 4px 12px; border: 1px solid var(--line); border-radius: 9999px; font-size: 13px; color: var(--ink); }
+.chip input:checked + span { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.more summary { cursor: pointer; font-size: 14px; color: var(--muted); font-weight: 500; }
+.more textarea { margin-top: 6px; }
+
+/* 카드 (설정 화면처럼 아래에 회색 바닥 띠) */
+.card { border: 1px solid var(--line); border-radius: 12px; background: var(--panel); padding: 20px 24px; display: grid; gap: 14px; }
+.card h3 { margin: 0; font-size: 15px; font-weight: 600; letter-spacing: -.01em; }
+.card .sub { margin: -8px 0 0; color: var(--muted); font-size: 13px; }
+.card-foot { margin: 6px -24px -20px; padding: 12px 24px; border-top: 1px solid var(--line); background: var(--surface); border-radius: 0 0 12px 12px; display: flex; gap: 12px; align-items: center; justify-content: flex-end; flex-wrap: wrap; }
+.card-foot .status { margin-right: auto; }
+.form { max-width: 680px; }
+.form .lbl { font-size: 14px; font-weight: 500; display: grid; gap: 8px; }
+.empty { color: var(--muted); border: 1px dashed var(--line); border-radius: 12px; padding: 32px 24px; text-align: center; margin: 0; }
+
+/* 숙소 입력 */
+.stay { border: 1px solid var(--line); border-radius: 8px; padding: 12px; display: grid; gap: 10px; background: var(--surface); }
+.stay label.f { font-size: 13px; }
 .stay-name { display: flex; gap: 6px; }
 .stay-name input { min-width: 0; }
 .stay-name button { padding: 6px 10px; font-size: 12px; flex: none; }
@@ -52,106 +108,138 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 .cands { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
 .cands li { display: flex; gap: 8px; align-items: center; font-size: 12px; }
 .cands li.muted { color: var(--muted); }
-.cands a { color: var(--accent); flex: none; }
-button.cand { flex: 1; min-width: 0; text-align: left; background: var(--bg); color: var(--ink); border: 1px solid var(--line); font-weight: 400; padding: 6px 8px; }
-button.cand:hover { border-color: var(--accent); }
+.cands a { color: var(--link); flex: none; }
+button.cand { flex: 1; min-width: 0; text-align: left; justify-content: flex-start; background: var(--panel); color: var(--ink); border: 1px solid var(--line); font-weight: 400; padding: 6px 8px; display: block; }
+button.cand:hover { border-color: var(--ink); }
 button.cand b, button.cand small { display: block; }
 button.cand small { color: var(--muted); }
 button.close { padding: 3px 10px; font-size: 12px; }
 .stay-foot { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--muted); }
 .stay-foot button { padding: 2px 8px; font-size: 12px; }
-.stay-foot a, .day-head .s a { color: var(--accent); text-decoration: none; }
-.stay-foot a:hover, .day-head .s a:hover { text-decoration: underline; }
-.day-head .s { font-size: 12px; margin-top: 2px; }
-.day-head .s a { color: var(--c-stay); }
-.more summary { cursor: pointer; font-size: 12px; color: var(--muted); font-weight: 500; }
-.more textarea { margin-top: 6px; }
-.route { display: inline-block; margin-top: 6px; font-size: 12px; font-weight: 700; color: var(--accent); text-decoration: none; border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px; }
-.route:hover { background: var(--soft); }
-.maps { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.maps .route { margin-top: 0; font-size: 13px; padding: 5px 12px; }
-button.find { padding: 4px 10px; font-size: 12px; }
-.slots { min-height: 44px; }
-.slot { cursor: grab; }
-.slot:hover { background: var(--soft); }
+.stay-foot a { color: var(--link); text-decoration: none; }
+
+/* 일정: 날짜 고르기 + 날짜별 목록 (Bookings 목록처럼) */
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center; }
+.toolbar .grow { flex: 1; }
+.tg { display: inline-flex; flex-wrap: wrap; gap: 2px; background: var(--soft); padding: 3px; border-radius: 8px; }
+.tg button { background: transparent; color: var(--muted); font-weight: 500; font-size: 13px; padding: 5px 12px; border-radius: 6px; border: 0; }
+.tg button[aria-pressed="true"] { background: var(--panel); color: var(--ink); box-shadow: 0 1px 2px rgb(0 0 0 / .08); }
+.board { display: grid; gap: 20px; min-width: 0; }
+.group { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--panel); }
+.gh { display: flex; flex-wrap: wrap; gap: 2px 14px; align-items: baseline; padding: 12px 16px; background: var(--surface); border-bottom: 1px solid var(--line); }
+.gh .gd { font-weight: 600; }
+.gh .gt { color: var(--muted); }
+.gh .gr { margin-left: auto; display: flex; gap: 4px 14px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
+.gh a { color: var(--link); text-decoration: none; }
+.gh a:hover { text-decoration: underline; }
+.slots { list-style: none; margin: 0; padding: 0; min-height: 44px; }
+.slot { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 2px 16px; padding: 14px 16px; border-top: 1px solid var(--line); cursor: grab; }
+.slot:first-child { border-top: 0; }
+.slot:hover { background: var(--hover); }
 .slot-ghost { opacity: .35; }
 .slots[data-locked="1"] .slot { cursor: default; }
 .slots[data-locked="1"] .slot:hover { background: transparent; }
-button.add { margin: 4px 12px 12px; width: calc(100% - 24px); padding: 6px; font-size: 12px; }
-.hint { margin-left: auto; }
-dialog { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--ink); padding: 18px; width: min(380px, calc(100vw - 32px)); box-sizing: border-box; }
-dialog::backdrop { background: rgb(0 0 0 / .4); }
-.ed-form { display: grid; gap: 10px; }
-.ed-form h3 { margin: 0; font-family: var(--f-display); font-weight: 400; font-size: 20px; }
-.ed-btns { display: flex; gap: 8px; }
-button.danger { color: var(--c-food); }
-#toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 10; display: flex; gap: 12px; align-items: center; background: var(--ink); color: var(--bg); padding: 10px 14px; border-radius: 8px; box-shadow: 0 4px 16px rgb(0 0 0 / .25); max-width: calc(100vw - 32px); box-sizing: border-box; font-size: 13px; }
-#toast button { background: transparent; color: var(--bg); border: 1px solid currentColor; padding: 3px 10px; font-size: 12px; flex: none; }
-.chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.chip { position: relative; }
-.chip input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
-.chip span { display: inline-block; padding: 4px 10px; border: 1px solid var(--line); border-radius: 999px; font-size: 13px; color: var(--ink); }
-.chip input:checked + span { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
-button { font: inherit; font-weight: 700; border: 0; border-radius: 6px; padding: 10px 14px; cursor: pointer; background: var(--accent); color: var(--accent-ink); }
-button.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); font-weight: 500; }
-button:disabled { opacity: .5; cursor: default; }
-.status { font-size: 13px; color: var(--muted); min-height: 1.2em; }
-.status.err { color: var(--c-food); }
-
-.board { display: grid; gap: 14px; min-width: 0; }
-.board-head { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline; }
-.board-head h2 { font-family: var(--f-display); font-weight: 400; font-size: 26px; margin: 0; text-wrap: balance; }
-.badge { font-size: 11px; font-weight: 700; letter-spacing: .08em; padding: 2px 8px; border-radius: 4px; background: var(--soft); color: var(--accent); }
-.summary { color: var(--muted); margin: 0; max-width: 70ch; }
-.legend { display: flex; flex-wrap: wrap; gap: 10px; font-size: 12px; color: var(--muted); }
-.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
-
-.days { overflow-x: auto; padding-bottom: 6px; }
-/* 가로 스크롤 없이 화면 폭에 맞춰 한 줄에 최대한 넣고, 넘치면 다음 줄로 */
-.days-inner { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; align-items: start; }
-.day { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; min-width: 0; }
-.day-head { padding: 12px 14px 10px; border-bottom: 1px solid var(--line); }
-.day-head .d { font-family: var(--f-mono); font-size: 12px; color: var(--muted); letter-spacing: .04em; }
-.day-head .n { font-family: var(--f-display); font-size: 20px; }
-.day-head .t { font-size: 13px; color: var(--muted); }
-.slots { list-style: none; margin: 0; padding: 0; }
-.slot { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 8px; padding: 9px 12px; border-top: 1px dashed var(--line); }
-.slot:first-child { border-top: 0; }
-.slot .tm { font-family: var(--f-mono); font-variant-numeric: tabular-nums; font-size: 13px; line-height: 1.3; }
-.slot .tm small { display: block; color: var(--muted); font-size: 11px; }
-.slot .body { border-left: 3px solid var(--k, var(--c-move)); padding-left: 10px; min-width: 0; }
-.slot .ttl { font-weight: 700; }
-.slot .kind { font-size: 11px; font-weight: 700; color: var(--k, var(--c-move)); letter-spacing: .04em; }
-.slot .place { font-size: 12px; }
-.slot .place a { color: var(--accent); text-decoration: none; }
+.slot .tm { font-weight: 600; font-variant-numeric: tabular-nums; }
+.slot .tm small { color: var(--muted); font-weight: 400; margin-left: 4px; }
+.slot .body { min-width: 0; display: grid; gap: 2px; justify-items: start; }
+.slot .ttl { font-weight: 600; }
+.slot .kind { font-size: 12px; font-weight: 500; color: var(--k, var(--c-move)); background: color-mix(in srgb, var(--k, var(--c-move)) 12%, transparent); border-radius: 6px; padding: 0 8px; }
+.slot .place { font-size: 13px; }
+.slot .place a { color: var(--link); text-decoration: none; }
 .slot .place a:hover { text-decoration: underline; }
-.slot .note { font-size: 12px; color: var(--muted); }
-.tips { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px; }
-.tips h3 { margin: 0 0 6px; font-size: 14px; }
-.tips ul { margin: 0; padding-left: 18px; color: var(--muted); }
-.edit { display: flex; flex-wrap: wrap; gap: 8px; }
-.edit textarea { flex: 1 1 260px; min-height: 42px; }
+.slot .note { font-size: 13px; color: var(--muted); }
+.leg { grid-column: 1 / -1; font-size: 12px; color: var(--muted); margin: -4px 0 8px; }
+.leg summary { cursor: pointer; list-style: none; padding: 3px 10px; border-radius: 6px; background: var(--soft); width: fit-content; max-width: 100%; box-sizing: border-box; }
+.leg summary::-webkit-details-marker { display: none; }
+.leg ul { margin: 4px 0 0; padding-left: 18px; }
+.leg li.best { color: var(--ink); font-weight: 500; }
+.tail-leg { padding: 10px 16px; border-top: 1px solid var(--line); }
+.tail-leg .leg { margin: 0; }
+button.add { display: flex; width: 100%; justify-content: flex-start; background: transparent; color: var(--muted); border: 0; border-top: 1px solid var(--line); border-radius: 0; padding: 11px 16px; font-weight: 500; font-size: 13px; }
+button.add:hover { background: var(--hover); color: var(--ink); }
+.tips ul { margin: 0; padding-left: 18px; color: var(--ink2); display: grid; gap: 4px; }
 
-/* 동선 맞춤 맛집 */
-.food { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; display: grid; gap: 8px; }
-.food-q { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.food-q input { flex: 1 1 180px; min-width: 0; }
+/* 오늘: 예약 확인 화면처럼 무엇·언제·어디 */
+.today-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.side-col { display: grid; gap: 20px; }
+.confirm { padding: 28px; gap: 16px; }
+.confirm .ok { width: 40px; height: 40px; border-radius: 50%; background: var(--soft); display: grid; place-items: center; }
+.confirm .ok svg { width: 20px; height: 20px; }
+.confirm h2 { margin: 0; font: 600 22px/1.3 var(--f-display); letter-spacing: -.02em; text-wrap: balance; }
+.confirm .sub { margin: -8px 0 0; color: var(--muted); }
+.rows { display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 12px 16px; margin: 0; padding: 16px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.rows dt { color: var(--muted); font-weight: 500; }
+.rows dd { margin: 0; font-weight: 500; min-width: 0; }
+.rows dd a { color: var(--link); text-decoration: none; }
+.acts { display: flex; gap: 8px; flex-wrap: wrap; }
+.tl { list-style: none; margin: 0; padding: 0; display: grid; }
+.tl li { display: grid; grid-template-columns: 48px 10px minmax(0, 1fr); gap: 10px; align-items: center; padding: 7px 0; border-top: 1px solid var(--line); }
+.tl li:first-child { border-top: 0; }
+.tl .t { font: 400 12px var(--f-mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+.tl i { width: 8px; height: 8px; border-radius: 50%; background: var(--line); }
+.tl li.now { font-weight: 600; }
+.tl li.now i { background: var(--ink); box-shadow: 0 0 0 3px var(--soft); }
+.tl li.done { color: var(--muted); text-decoration: line-through; }
+.stat .lbl { color: var(--muted); font-size: 13px; font-weight: 500; }
+.stat b { font: 600 28px/1.1 var(--f-display); letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+
+/* 맛집 */
+.food { display: grid; gap: 14px; }
+.food-q { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; border: 1px solid var(--line); border-radius: 12px; padding: 12px; background: var(--panel); }
+.food-q input { flex: 1 1 220px; min-width: 0; }
 .food-q select { flex: 0 1 auto; width: auto; }
 .food .status { margin: 0; }
-.food-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 8px; }
-.food-list li { border: 1px solid var(--line); border-radius: 8px; padding: 10px; display: grid; gap: 4px; align-content: start; }
-.food-list .fh small { display: block; color: var(--muted); font-size: 12px; }
-.food-list .fr { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 13px; font-family: var(--f-mono); }
-.food-list .rate { color: var(--c-food); font-weight: 700; }
-.food-list .fn { font-size: 12px; color: var(--muted); }
-.food-list .fb { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; margin-top: 4px; font-size: 12px; }
-.food-list .fb button { padding: 4px 10px; font-size: 12px; }
-.food-list .fb a { color: var(--accent); }
+.food-list { list-style: none; margin: 0; padding: 0; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--panel); }
+.food-list li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 20px; padding: 14px 16px; border-top: 1px solid var(--line); }
+.food-list li:first-child { border-top: 0; }
+.food-list .fh b { font-weight: 600; }
+.food-list .fh small { margin-left: 8px; color: var(--muted); font-size: 13px; }
+.food-list .fr { display: flex; flex-wrap: wrap; gap: 6px; font-size: 12px; align-items: center; }
+.food-list .fr span { border-radius: 6px; padding: 1px 8px; background: var(--soft); color: var(--ink2); font-weight: 500; }
+.food-list .fr .rate { color: var(--c-food); background: color-mix(in srgb, var(--c-food) 12%, transparent); }
+.food-list .fn { font-size: 13px; color: var(--muted); }
+.food-list .fb { grid-column: 2; grid-row: 1 / span 3; align-self: center; display: flex; gap: 6px 12px; align-items: center; font-size: 13px; }
+.food-list .fb button { padding: 6px 12px; font-size: 13px; }
+.food-list .fb a { color: var(--link); text-decoration: none; }
+
+/* 창 */
+dialog { border: 1px solid var(--line); border-radius: 12px; background: var(--panel); color: var(--ink); padding: 20px; width: min(400px, calc(100vw - 32px)); box-sizing: border-box; box-shadow: 0 20px 40px rgb(0 0 0 / .15); }
+dialog::backdrop { background: rgb(0 0 0 / .4); }
+.ed-form { display: grid; gap: 12px; }
+.ed-form h3 { margin: 0; font-family: var(--f-display); font-weight: 600; font-size: 18px; letter-spacing: -.02em; }
+.ed-btns { display: flex; gap: 8px; }
+#toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 10; display: flex; gap: 12px; align-items: center; background: var(--accent); color: var(--accent-ink); padding: 10px 14px; border-radius: 8px; box-shadow: 0 4px 16px rgb(0 0 0 / .25); max-width: calc(100vw - 32px); box-sizing: border-box; font-size: 13px; }
+#toast button { background: transparent; color: var(--accent-ink); border: 1px solid currentColor; padding: 3px 10px; font-size: 12px; flex: none; }
+
+/* 폰: 사이드바가 아래 탭으로 */
+@media (max-width: 760px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 9; border-right: 0; border-top: 1px solid var(--line); background: var(--panel); padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px)); }
+  .nav-in { position: static; min-height: 0; }
+  .brand, .nav-foot { display: none; }
+  .nav-list { grid-auto-flow: column; grid-auto-columns: 1fr; }
+  .nav-list button { flex-direction: column; gap: 3px; justify-content: center; font-size: 11px; padding: 6px 0; }
+  .nav-list svg.i { width: 20px; height: 20px; }
+  .mtop { display: flex; gap: 10px; align-items: center; }
+  .mtop b { font-weight: 600; }
+  .mtop small { color: var(--muted); font-size: 12px; margin-left: auto; }
+  main { padding: 16px 16px calc(96px + env(safe-area-inset-bottom, 0px)); display: grid; gap: 20px; align-content: start; }
+  .slot { grid-template-columns: minmax(0, 1fr); }
+  .gh .gr { margin-left: 0; }
+  .today-grid { grid-template-columns: minmax(0, 1fr); }
+  .confirm { padding: 20px; }
+  .food-list li { grid-template-columns: minmax(0, 1fr); }
+  .food-list .fb { grid-column: 1; grid-row: auto; margin-top: 6px; }
+  .card { padding: 16px; }
+  .card-foot { margin: 6px -16px -16px; padding: 12px 16px; }
+  .row2 { grid-template-columns: minmax(0, 1fr); }
+  #toast { bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
+}
 
 /* 한 장으로 저장: 미리보기 창 */
 dialog.ex { width: min(1100px, calc(100vw - 32px)); }
 .ex-top { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.ex-top h3 { margin: 0 8px 0 0; font-family: var(--f-display); font-weight: 400; font-size: 20px; }
+.ex-top h3 { margin: 0 8px 0 0; font-family: var(--f-display); font-weight: 600; font-size: 18px; }
 .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
 .seg label { padding: 5px 14px; font-size: 13px; cursor: pointer; }
 .seg input { position: absolute; opacity: 0; pointer-events: none; }
@@ -218,60 +306,91 @@ dialog.ex { width: min(1100px, calc(100vw - 32px)); }
 .sh-pass .bottom li + li { margin-top: 4px; }
 .sh-pass .key { display: flex; gap: 8px 18px; flex-wrap: wrap; align-content: start; width: 420px; font-size: 16px; }
 .sh-pass .key i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; background: var(--t); margin-right: 6px; }
-@media (prefers-reduced-motion: no-preference) { .day { animation: up .3s ease both; } @keyframes up { from { transform: translateY(6px); } } }
 </style>
 
-<header class="top">
-  <h1>여행 일정 보드</h1>
-  <span class="save-state" id="saveState">저장소 연결 중…</span>
-</header>
+<div class="app">
+  <aside class="nav">
+    <div class="nav-in">
+      <div class="brand">
+        <span class="logo" aria-hidden="true"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M9 15l2 2 4-4"/></svg></span>
+        <span><b>여행 일정 보드</b><small id="navTrip">새 여행</small></span>
+      </div>
+      <nav class="nav-list" aria-label="메뉴">
+        <button type="button" data-view="today"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>오늘</button>
+        <button type="button" data-view="plan"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>일정</button>
+        <button type="button" data-view="food"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2v20M4 2v6a3 3 0 0 0 6 0V2M18 22V2c-2 1-4 4-4 8 0 2 1 3 4 3"/></svg>맛집</button>
+        <button type="button" data-view="info"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg>여행 정보</button>
+      </nav>
+      <div class="nav-foot"><span class="save-state" id="saveState">저장소 연결 중…</span></div>
+    </div>
+  </aside>
 
-<div class="wrap">
-  <form class="panel" id="form" autocomplete="off">
-    <h2>여행 정보</h2>
-    <label class="f">여행지<input id="dest" placeholder="예: 후쿠오카"></label>
-    <div class="row2">
-      <label class="f">가는 날<input id="start" type="date"></label>
-      <label class="f">오는 날<input id="end" type="date"></label>
-    </div>
-    <div class="row2">
-      <label class="f">현지 도착 시각<input id="arrive" type="time"></label>
-      <label class="f">귀국편 출발 시각<input id="depart" type="time"></label>
-    </div>
-    <div class="row2">
-      <label class="f">인원<input id="people" type="number" min="1" max="20" value="2"></label>
-      <label class="f">누구랑
-        <select id="who">
-          <option value="">선택 안 함</option>
-          <option>친구 (남자끼리)</option><option>친구 (여자끼리)</option><option>친구 (남녀 섞여서)</option>
-          <option>연인·부부</option><option>가족 (아이 동반)</option><option>가족 (부모님 동반)</option>
-          <option>혼자</option><option>직장 동료</option>
-        </select>
-      </label>
-    </div>
-    <div class="row2">
-      <label class="f">일정 강도
-        <select id="pace"><option>여유롭게</option><option selected>보통</option><option>빡빡하게</option></select>
-      </label>
-    </div>
-    <div class="f" style="display:grid;gap:6px;font-size:12px;color:var(--muted);font-weight:500">숙소
-      <div id="stays" style="display:grid;gap:8px"></div>
-      <button type="button" class="ghost" id="addStay">+ 숙소 추가</button>
-    </div>
-    <div class="f" style="display:grid;gap:6px;font-size:12px;color:var(--muted);font-weight:500">취향
-      <div class="chips" id="likes"></div>
-    </div>
-    <label class="f">꼭 하고 싶은 것<textarea id="must" placeholder="예: 다자이후 텐만구, 후쿠오카 타워 야경"></textarea></label>
-    <label class="f">먹고 싶은 것<textarea id="eat" placeholder="예: 모츠나베, 하카타 라멘, 멘타이코"></textarea></label>
-    <details class="more">
-      <summary>피하고 싶은 것 (선택)</summary>
-      <textarea id="avoid" aria-label="피하고 싶은 것" placeholder="예: 날것, 오래 걷기"></textarea>
-    </details>
-    <button type="submit" id="gen">일정 만들기</button>
-    <div class="status" id="status" role="status"></div>
-  </form>
+  <main>
+    <header class="mtop">
+      <span class="logo" aria-hidden="true"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M9 15l2 2 4-4"/></svg></span>
+      <b>여행 일정 보드</b><small id="navTrip2"></small>
+    </header>
 
-  <section class="board" id="board" aria-live="polite"></section>
+    <section class="view" id="v-today" hidden>
+      <div class="ph"><div><h1>오늘</h1><p class="sub" id="todaySub"></p></div></div>
+      <div id="todayBody"></div>
+    </section>
+
+    <section class="view" id="v-plan">
+      <div class="board" id="board" aria-live="polite"></div>
+    </section>
+
+    <section class="view" id="v-food" hidden>
+      <div class="ph"><div><h1>맛집 찾기</h1><p class="sub">고른 날의 동선 근처에서 구글·타베로그 평점이 좋은 곳을 찾아요. 비워두고 찾으면 근처 맛집 5곳을 보여줘요.</p></div></div>
+      <div id="foodBody"></div>
+    </section>
+
+    <section class="view" id="v-info" hidden>
+      <div class="ph"><div><h1>여행 정보</h1><p class="sub">일정을 만들 때 쓰는 정보예요. 고치면 바로 저장돼요.</p></div></div>
+      <form class="card form" id="form" autocomplete="off">
+        <label class="f">여행지<input id="dest" placeholder="예: 후쿠오카"></label>
+        <div class="row2">
+          <label class="f">가는 날<input id="start" type="date"></label>
+          <label class="f">오는 날<input id="end" type="date"></label>
+        </div>
+        <div class="row2">
+          <label class="f">현지 도착 시각<input id="arrive" type="time"></label>
+          <label class="f">귀국편 출발 시각<input id="depart" type="time"></label>
+        </div>
+        <div class="row2">
+          <label class="f">인원<input id="people" type="number" min="1" max="20" value="2"></label>
+          <label class="f">누구랑
+            <select id="who">
+              <option value="">선택 안 함</option>
+              <option>친구 (남자끼리)</option><option>친구 (여자끼리)</option><option>친구 (남녀 섞여서)</option>
+              <option>연인·부부</option><option>가족 (아이 동반)</option><option>가족 (부모님 동반)</option>
+              <option>혼자</option><option>직장 동료</option>
+            </select>
+          </label>
+        </div>
+        <label class="f">일정 강도
+          <select id="pace"><option>여유롭게</option><option selected>보통</option><option>빡빡하게</option></select>
+        </label>
+        <div class="lbl">숙소
+          <div id="stays" style="display:grid;gap:8px"></div>
+          <button type="button" class="ghost" id="addStay">+ 숙소 추가</button>
+        </div>
+        <div class="lbl">취향
+          <div class="chips" id="likes"></div>
+        </div>
+        <label class="f">꼭 하고 싶은 것<textarea id="must" placeholder="예: 다자이후 텐만구, 후쿠오카 타워 야경"></textarea></label>
+        <label class="f">먹고 싶은 것<textarea id="eat" placeholder="예: 모츠나베, 하카타 라멘, 멘타이코"></textarea></label>
+        <details class="more">
+          <summary>피하고 싶은 것 (선택)</summary>
+          <textarea id="avoid" aria-label="피하고 싶은 것" placeholder="예: 날것, 오래 걷기"></textarea>
+        </details>
+        <div class="card-foot">
+          <div class="status" id="status" role="status"></div>
+          <button type="submit" id="gen">일정 만들기</button>
+        </div>
+      </form>
+    </section>
+  </main>
 </div>
 
 <div id="toast" role="status" hidden></div>
@@ -707,55 +826,70 @@ $("exPdf").onclick = () => exSave("pdf");
 $("exClose").onclick = () => $("ex").close();
 claude.use("downloads").then((d) => downloads = d, () => {});
 let sortables = [];
+let planSel = null;  // 일정 화면에서 고른 날 (null = 전체)
+const btnEl = (label, cls, fn) => { const x = h("button", { type: "button", class: cls }, label); x.onclick = fn; return x; };
+function renderNav() {
+  const f = state.form, p = state.plan;
+  const t = p?.example ? "예시 일정" : [f?.dest, f?.start && f?.end ? `${md(f.start)}–${md(f.end)}` : ""].filter(Boolean).join(" · ");
+  for (const id of ["navTrip", "navTrip2"]) $(id).textContent = t || "새 여행";
+}
+function dayGroup(p, i, locked) {
+  const d = p.days[i]; d.items ||= [];
+  const s = stayOn(d.date)?.name || d.stay, f = locked ? null : dayFare(d, i);
+  return h("section", { class: "group" },
+    h("div", { class: "gh" },
+      h("span", { class: "gd" }, `${d.label || `${i + 1}일차`}${d.date ? " · " + fmtDate(d.date) : ""}`),
+      d.theme ? h("span", { class: "gt" }, d.theme) : null,
+      h("span", { class: "gr" }, s ? mapLink(s, "🛏 ") : null, f == null ? null : h("span", {}, `교통비 약 ${yen(f)}/인`),
+        locked || planSel != null ? null : h("a", { href: mapUrl2(i), target: "_blank", rel: "noopener" }, "동선 지도"))),
+    h("ol", { class: "slots", "data-key": i, "data-locked": locked ? "1" : "" },
+      d.items.map((it, j) => slotEl(it, j ? placeOf(d.items[j - 1]) : (i > 0 ? stayOn(p.days[i - 1].date)?.name : null)))),
+    d.items.length ? (() => { const el = legEl(placeOf(d.items.at(-1)), stayOn(d.date)?.name); return el ? h("div", { class: "tail-leg" }, el) : null; })() : null,
+    locked ? null : h("button", { type: "button", class: "add", "data-add": i }, "+ 이 날에 일정 추가"));
+}
 function render() {
+  renderToday();
+  renderNav();
   const p = state.plan, b = $("board");
   sortables.forEach((s) => s.destroy()); sortables = [];
   const keep = { editReq: $("editReq")?.value || "" };
   b.replaceChildren();
+  $("foodBody").replaceChildren();
   if (!p || !Array.isArray(p.days)) return;
   const locked = !!p.example;
+  if (planSel != null && !p.days[planSel]) planSel = null;
+  $("foodBody").append(locked ? h("p", { class: "empty" }, "내 일정을 만들면 그날 동선에 맞는 맛집을 찾을 수 있어요.") : foodPanel());
   b.append(
-    h("div", { class: "board-head" }, h("h2", {}, p.title || "여행 일정"), locked ? h("span", { class: "badge" }, "예시") : null,
-      (() => { const bt = h("button", { type: "button", class: "ghost find" }, "🖼 한 장으로 저장 (JPG·PDF)"); bt.onclick = openExport; return bt; })()),
-    p.summary ? h("p", { class: "summary" }, p.summary) : null,
-    locked ? null : h("div", { class: "maps" },
-      h("a", { class: "route", href: mapUrl2(null), target: "_blank", rel: "noopener" }, "🗺 전체 일정 지도로 보기"),
-      (() => { const n = missingPlaces().length; if (!n) return null; const bt = h("button", { type: "button", class: "ghost find" }, `📍 위치 찾기 (${n}곳)`); bt.onclick = fillCoords; return bt; })(),
-      (() => { const n = missingLegs().length; if (!n) return null; const bt = h("button", { type: "button", class: "ghost find" }, `🚃 이동 수단 찾기 (${n}구간)`); bt.onclick = fillLegs; return bt; })(),
+    h("div", { class: "ph" },
+      h("div", {},
+        h("h1", {}, p.title || "여행 일정", locked ? h("span", { class: "badge" }, "예시") : null),
+        p.summary ? h("p", { class: "sub" }, p.summary) : null,
+        h("p", { class: "hint" }, locked ? "여행 정보에서 ‘일정 만들기’를 누르면 내 일정으로 바뀌어요." : "일정을 끌어서 옮기고, 눌러서 시간과 내용을 고쳐요.")),
+      h("div", { class: "ph-act" },
+        locked ? null : h("a", { class: "sec", href: mapUrl2(planSel), target: "_blank", rel: "noopener" }, planSel == null ? "전체 지도" : "이 날 지도"),
+        btnEl("한 장으로 저장", "sec", openExport),
+        locked ? null : btnEl("+ 일정 추가", "", () => openEditor(planSel ?? 0, null)))),
+    h("div", { class: "toolbar" },
+      h("div", { class: "tg", role: "group", "aria-label": "날짜 고르기" },
+        [null, ...p.days.keys()].map((i) => { const x = btnEl(i == null ? "전체" : `${i + 1}일차`, "", () => { planSel = i; render(); }); x.setAttribute("aria-pressed", String(planSel === i)); return x; })),
+      h("span", { class: "grow" }),
+      locked ? null : (() => { const n = missingPlaces().length; return n ? btnEl(`위치 찾기 (${n})`, "sec sm", fillCoords) : null; })(),
+      locked ? null : (() => { const n = missingLegs().length; return n ? btnEl(`이동 수단 찾기 (${n})`, "sec sm", fillLegs) : null; })(),
       h("span", { class: "status", id: "mapMsg" }, mapMsg)),
-    locked ? null : foodPanel(),
-    h("div", { class: "legend" }, Object.entries(KINDS).map(([k, v]) => h("span", {}, h("i", { style: `background:var(${v})` }), k)),
-      h("span", { class: "hint" }, locked ? "일정을 만들면 드래그로 옮기고 눌러서 고칠 수 있어요" : "드래그해서 옮기고, 눌러서 시간·내용을 고쳐요"))
-  );
-  const inner = h("div", { class: "days-inner" });
-  p.days.forEach((d, i) => {
-    d.items ||= [];
-    inner.append(h("article", { class: "day", style: `animation-delay:${i * 40}ms` },
-      h("div", { class: "day-head" },
-        h("div", { class: "d" }, fmtDate(d.date)),
-        h("div", { class: "n" }, d.label || `${i + 1}일차`),
-        d.theme ? h("div", { class: "t" }, d.theme) : null,
-        (() => { const s = stayOn(d.date)?.name || d.stay; return s ? h("div", { class: "s" }, mapLink(s, "🛏 ")) : null; })(),
-        locked ? null : h("a", { class: "route", href: mapUrl2(i), target: "_blank", rel: "noopener" }, "🗺 이 날 동선 지도"),
-        (() => { const f = locked ? null : dayFare(d, i); return f == null ? null : h("div", { class: "fare" }, `🚃 교통비 약 ${yen(f)}/인 (예상)`); })()),
-      h("ol", { class: "slots", "data-key": i, "data-locked": locked ? "1" : "" },
-        d.items.map((it, j) => slotEl(it, j ? placeOf(d.items[j - 1]) : (i > 0 ? stayOn(p.days[i - 1].date)?.name : null)))),
-      d.items.length ? (() => { const el = legEl(placeOf(d.items.at(-1)), stayOn(d.date)?.name); return el ? h("div", { class: "tail-leg" }, el) : null; })() : null,
-      locked ? null : h("button", { type: "button", class: "ghost add", "data-add": i }, "+ 음식점·일정 추가")));
-  });
-  b.append(h("div", { class: "days" }, inner));
-  if (p.tips?.length) b.append(h("div", { class: "tips" }, h("h3", {}, "알아두면 좋은 것"), h("ul", {}, p.tips.map((t) => h("li", {}, t)))));
+    ...(planSel == null ? [...p.days.keys()] : [planSel]).map((i) => dayGroup(p, i, locked)));
+  if (p.tips?.length) b.append(h("div", { class: "card tips" }, h("h3", {}, "알아두면 좋은 것"), h("ul", {}, p.tips.map((t) => h("li", {}, t)))));
   if (!locked) {
-    const ta = h("textarea", { id: "editReq", placeholder: "고치고 싶은 점을 적어주세요. 예: 2일차 오후는 온천으로 바꿔줘" });
+    const ta = h("textarea", { id: "editReq", placeholder: "예: 2일차 오후는 온천으로 바꿔줘" });
     ta.value = keep.editReq;
     const btn = h("button", { type: "button", id: "editBtn" }, "일정 고치기");
     btn.onclick = () => ta.value.trim() && generate(ta.value.trim());
-    b.append(h("div", { class: "edit" }, ta, btn));
+    b.append(h("div", { class: "card edit" }, h("h3", {}, "Claude에게 고쳐달라고 하기"), h("p", { class: "sub" }, "바꾸고 싶은 점을 적으면 일정 전체를 다시 짜요."), ta,
+      h("div", { class: "card-foot" }, btn)));
   }
   if (window.Sortable) for (const el of b.querySelectorAll(".slots")) {
     sortables.push(Sortable.create(el, {
       group: "plan", animation: 150, delay: 150, delayOnTouchOnly: true,
-      disabled: el.dataset.locked === "1", ghostClass: "slot-ghost", filter: "a", preventOnFilter: false,
+      disabled: el.dataset.locked === "1", ghostClass: "slot-ghost", filter: "a, details", preventOnFilter: false,
       onEnd: syncFromDom
     }));
   }
@@ -862,7 +996,7 @@ function foodPanel() {
   q.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.isComposing) { e.preventDefault(); run(); } });
   const star = (label, v) => v ? h("span", { class: "rate" }, `${label} ★${v}`) : null;
   return h("div", { class: "food" },
-    h("div", { class: "food-q" }, h("b", {}, "🍽 동선 맞춤 맛집"), q, day, meal, go),
+    h("div", { class: "food-q" }, q, day, meal, go),
     food.msg ? h("p", { class: "status" }, food.msg) : null,
     food.list?.length ? h("ul", { class: "food-list" }, food.list.map((r) => {
       const put = h("button", { type: "button" }, `${food.day + 1}일차에 넣기`); put.onclick = () => addFood(r);
@@ -946,6 +1080,73 @@ $("board").addEventListener("click", (e) => {
 });
 $("board").addEventListener("keydown", (e) => { if (e.key === "Enter" && e.target.classList.contains("slot")) e.target.click(); });
 
+// ---- 오늘 카드: 여행 중이면 오늘, 여행 전이면 1일차, 끝났으면 마지막 날 ----
+const ymd = (x) => `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, "0")}-${String(x.getDate()).padStart(2, "0")}`;
+const iyeyo = (w) => { const c = w.charCodeAt(w.length - 1) - 0xac00; return c >= 0 && c < 11172 && c % 28 === 0 ? "예요" : "이에요"; };
+function todayPick(now = new Date()) {
+  const days = state.plan.days, t = ymd(now);
+  let i = days.findIndex((d) => d.date === t), note = "";
+  if (i < 0) {
+    const before = !days[0]?.date || t < days[0].date;
+    i = before ? 0 : days.length - 1;
+    const left = days[0]?.date ? Math.round((new Date(days[0].date + "T00:00:00") - new Date(t + "T00:00:00")) / 864e5) : 0;
+    note = before ? (left > 0 ? `출발 ${left}일 전 · 미리보기` : "미리보기") : "여행이 끝났어요";
+  }
+  const items = days[i].items || [], mins = now.getHours() * 60 + now.getMinutes();
+  // 다음 일정: 여행 중이면 아직 시작 안 한 첫 일정(없으면 -1), 아니면 첫 일정
+  const nx = note ? (items.length ? 0 : -1) : items.findIndex((it) => toMin(it.time) == null || toMin(it.time) > mins);
+  return { i, d: days[i], items, note, nx };
+}
+function renderToday() {
+  const el = $("todayBody");
+  if (!state.plan?.days?.length) { $("todaySub").textContent = ""; return el.replaceChildren(); }
+  const p = state.plan, { i, d, items, note, nx } = todayPick();
+  const x = new Date(d.date + "T00:00:00"), next = items[nx];
+  $("todaySub").textContent = (d.date ? `${i + 1}일차 · ${x.getMonth() + 1}월 ${x.getDate()}일 ${"일월화수목금토"[x.getDay()]}요일` : `${i + 1}일차`) + (note ? ` · ${note}` : "");
+  const from = next ? (nx > 0 ? placeOf(items[nx - 1]) : (i > 0 ? stayOn(p.days[i - 1].date)?.name : null)) : null;
+  const L = next && from ? state.legs[legKey(from, placeOf(next))] : null, o = L && (L.opts[L.best] || L.opts[0]);
+  const c = next && state.coords[placeOf(next)];
+  const dest = next ? (c ? c.join(",") : `${placeOf(next)} ${state.form?.dest || ""}`.trim()) : "";
+  const fare = p.example ? null : dayFare(d, i);
+  const rows = next ? [
+    ["무엇", next.title],
+    ["언제", `${next.time || "시간 미정"}${next.end ? " – " + next.end : ""}`],
+    ["어디", mapLink(placeOf(next), "")],
+    o ? ["가는 법", `${MODE_ICON[o.mode] || "🚃"} ${o.mode}${o.detail ? " " + o.detail : ""} · ${o.min}분${o.yen ? " · " + yen(perPerson(o)) + "/인" : ""}`] : null,
+    next.note ? ["메모", next.note] : null].filter(Boolean) : [];
+  el.replaceChildren(h("div", { class: "today-grid" },
+    h("div", { class: "card confirm" },
+      h("div", { class: "ok", "aria-hidden": "true" }, svgIcon(next ? "M12 7v5l3 2|c" : "M5 12l5 5L20 7")),
+      h("h2", {}, next ? `${note ? "첫 일정은" : "다음은"} ${next.title}${iyeyo(next.title)}` : "오늘 일정을 모두 마쳤어요"),
+      next ? h("p", { class: "sub" }, from ? `${from}에서 출발해요.` : "여행의 첫 일정이에요.") : null,
+      rows.length ? h("dl", { class: "rows" }, rows.flatMap(([k, v]) => [h("dt", {}, k), h("dd", {}, v)])) : null,
+      h("div", { class: "acts" },
+        next ? h("a", { class: "btn", href: `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(dest)}&travelmode=transit`, target: "_blank", rel: "noopener" }, "길찾기") : null,
+        btnEl("이 날 일정 보기", "sec", () => { planSel = i; setView("plan"); render(); }))),
+    h("div", { class: "side-col" },
+      h("div", { class: "card" }, h("h3", {}, note ? `${i + 1}일차 일정` : "오늘 일정"),
+        items.length ? h("ul", { class: "tl" }, items.map((it, j) => h("li", { class: j === nx ? "now" : !note && (nx < 0 || j < nx) ? "done" : "" },
+          h("span", { class: "t" }, it.time || "–"), h("i"), h("span", {}, it.title)))) : h("p", { class: "sub" }, "아직 일정이 없어요.")),
+      fare == null ? null : h("div", { class: "card stat" }, h("span", { class: "lbl" }, `${note ? `${i + 1}일차` : "오늘"} 교통비 (1인, 예상)`), h("b", {}, yen(fare))))));
+}
+// 작은 선 아이콘: "경로|c" 면 시계 원을 같이 그림
+function svgIcon(spec) {
+  const [d, circle] = spec.split("|"), ns = "http://www.w3.org/2000/svg", s = document.createElementNS(ns, "svg");
+  s.setAttribute("viewBox", "0 0 24 24"); s.setAttribute("class", "i");
+  if (circle) { const c = document.createElementNS(ns, "circle"); c.setAttribute("cx", 12); c.setAttribute("cy", 12); c.setAttribute("r", 9); s.append(c); }
+  const path = document.createElementNS(ns, "path"); path.setAttribute("d", d); s.append(path);
+  return s;
+}
+setInterval(renderToday, 60000);  // 시간이 지나면 다음 일정이 바뀜
+// 화면 전환 (PC는 사이드바, 폰은 아래 탭)
+let viewTouched = false;
+function setView(v) {
+  for (const s of document.querySelectorAll(".view")) s.hidden = s.id !== "v-" + v;
+  for (const b of document.querySelectorAll("[data-view]")) b.setAttribute("aria-current", b.dataset.view === v ? "page" : "false");
+}
+for (const b of document.querySelectorAll("[data-view]")) b.onclick = () => { viewTouched = true; setView(b.dataset.view); scrollTo(0, 0); };
+setView("plan");
+
 // ---- 저장 (db, 없으면 이 브라우저에만) ----
 let db = null, docRef = null, writing = Promise.resolve(), saveTimer;
 const LS = "trip-board";
@@ -985,6 +1186,8 @@ const loaded = (async () => {
   } catch { $("saveState").textContent = "저장소를 읽지 못했어요. 이 브라우저에만 저장돼요"; docRef = null; }
 })();
 
+loaded.then(() => { if (!viewTouched && state.plan?.days?.length && !todayPick().note) setView("today"); });  // 여행 중이면 '오늘'부터
+
 // ---- Claude로 일정 만들기 ----
 let sample, busy = false;
 (async () => {
@@ -997,7 +1200,6 @@ let sample, busy = false;
 function dayList(f) {
   if (!f.start || !f.end) return [];
   const out = [], d = new Date(f.start + "T00:00:00"), e = new Date(f.end + "T00:00:00");
-  const ymd = (x) => `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, "0")}-${String(x.getDate()).padStart(2, "0")}`;
   while (d <= e && out.length < 31) { out.push(ymd(d)); d.setDate(d.getDate() + 1); }
   return out;
 }
@@ -1044,9 +1246,9 @@ async function generate(editReq) {
       delete x.lat; delete x.lng;
     }
     state = { form: f, plan, bucket: state.bucket, coords: state.coords, legs: state.legs };
-    render();
+    planSel = null; render(); setView("plan");
     save();
-    $("status").textContent = editReq ? "일정을 고쳤어요." : "일정을 만들었어요. 아래에서 고칠 점을 요청할 수도 있어요.";
+    $("status").textContent = editReq ? "일정을 고쳤어요." : "일정을 만들었어요. 일정 화면 아래에서 고칠 점을 요청할 수도 있어요.";
     busy = false;
     enrich();
   } catch (e) {
