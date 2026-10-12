@@ -433,6 +433,15 @@ dialog.ex { width: min(1100px, calc(100vw - 32px)); }
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
 <script>
+// claude.ai 밖(일반 브라우저)에서 열면 claude가 없음: 파일 저장만 브라우저 다운로드로 대신하고 나머지는 꺼둠
+if (!globalThis.claude) globalThis.claude = {
+  use: (name) => name === "downloads"
+    ? Promise.resolve({ save: async ({ filename, data }) => {
+        const a = document.createElement("a"); a.href = URL.createObjectURL(data); a.download = filename;
+        document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+      } })
+    : Promise.reject({ code: "unavailable" }),
+};
 const LIKES = ["맛집", "카페", "쇼핑", "온천", "근교 여행", "야경", "역사·문화", "자연", "술집"];
 const KINDS = { "이동": "--c-move", "식사": "--c-food", "관광": "--c-sight", "쇼핑": "--c-shop", "휴식": "--c-rest", "숙소": "--c-stay" };
 const FIELDS = ["dest", "start", "end", "arrive", "depart", "people", "who", "pace", "must", "eat", "avoid"];
@@ -598,7 +607,7 @@ function slotEl(it, from) {
       it.note ? h("div", { class: "note" }, it.note) : null));
 }
 // 지도 페이지(GitHub Pages)로 일정 + 좌표를 넘김: #<base64url(JSON)>
-const MAP_PAGE = "https://ckdtlr03.github.io/trip-map/";
+const MAP_PAGE = location.protocol === "file:" ? "index.html" : "https://ckdtlr03.github.io/trip-map/";  // 내 PC에서 열면 옆의 index.html
 const placeOf = (x) => x.place || x.title || "";
 function allPlaces() {
   const names = [...state.plan.days.flatMap((d) => d.items), ...state.bucket].map(placeOf);
@@ -626,7 +635,8 @@ function setMapMsg(t, err) {
 }
 async function fillCoords() {
   const miss = missingPlaces();
-  if (!sample || coordBusy || !miss.length || state.plan.example) return;
+  if (coordBusy || !miss.length || state.plan.example) return;
+  if (!sample) return fillCoordsOsm(miss);
   coordBusy = true;
   setMapMsg(`지도에 표시할 위치를 찾는 중이에요… (${miss.length}곳, 30초~1분)`);
   let found = 0, lastErr = null;
@@ -652,6 +662,33 @@ async function fillCoords() {
   document.dispatchEvent(new Event("coords"));
   const left = missingPlaces().length;
   if (lastErr && !found) setMapMsg(lastErr === "not_granted" ? "Claude 사용을 허용해야 위치를 찾을 수 있어요." : `위치를 찾지 못했어요 (${lastErr}). ‘📍 위치 찾기’를 다시 눌러주세요.`, true);
+  else setMapMsg(left ? `${found}곳을 찾았어요. ${left}곳은 못 찾았어요. 장소 이름을 더 정확히 고치면 다시 찾을 수 있어요.` : `${found}곳 위치를 모두 찾았어요. 지도로 볼 수 있어요.`);
+}
+// Claude를 못 쓰는 화면: OpenStreetMap 검색(Nominatim, 초당 1회 제한)으로 대신 찾기
+async function fillCoordsOsm(miss) {
+  coordBusy = true;
+  setMapMsg(`OpenStreetMap에서 위치를 찾는 중이에요… (${miss.length}곳, 1곳당 약 1초)`);
+  const dest = state.form?.dest || "";
+  let found = 0, failed = false;
+  for (const n of miss) {
+    try {
+      let hit = null;
+      for (const q of dest ? [`${n} ${dest}`, n] : [n]) {
+        const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(q)}`, { headers: { "Accept-Language": "ko,ja,en" } });
+        if (!r.ok) throw new Error(r.status);
+        hit = (await r.json())[0];
+        await new Promise((ok) => setTimeout(ok, 1100));
+        if (hit) break;
+      }
+      if (hit) { state.coords[n] = [+hit.lat, +hit.lon]; found++; }
+    } catch { failed = true; break; }
+  }
+  coordBusy = false;
+  if (found) save();
+  render();
+  document.dispatchEvent(new Event("coords"));
+  const left = missingPlaces().length;
+  if (failed && !found) setMapMsg("위치 검색 서버에 연결하지 못했어요. 잠시 뒤 ‘📍 위치 찾기’를 다시 눌러주세요.", true);
   else setMapMsg(left ? `${found}곳을 찾았어요. ${left}곳은 못 찾았어요. 장소 이름을 더 정확히 고치면 다시 찾을 수 있어요.` : `${found}곳 위치를 모두 찾았어요. 지도로 볼 수 있어요.`);
 }
 // ---- 구간별 이동 수단·요금 (Claude 추정치) ----
